@@ -1,0 +1,9 @@
+{
+  "name": "patteri",
+  "version": "1.0.0",
+  "description": "Radiator",
+  "repository": "git@github.com:yareeh/patteri.git",
+  "author": "jari@iki.fi",
+  "license": "MIT",
+  "private": false
+}
