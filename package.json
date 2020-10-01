@@ -6,7 +6,21 @@
   "author": "jari@iki.fi",
   "license": "MIT",
   "private": false,
+  "scripts": {
+    "lint": "eslint src"
+  },
   "devDependencies": {
+    "eslint": "^7.10.0",
     "http-server": "^0.12.3"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 6
+    }
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "strict": "error"
   }
 }
+
