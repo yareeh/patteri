@@ -5,5 +5,8 @@
   "repository": "git@github.com:yareeh/patteri.git",
   "author": "jari@iki.fi",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "devDependencies": {
+    "http-server": "^0.12.3"
+  }
 }
