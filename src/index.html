@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><title>Patteri</title></head>
+<head>
+  <title>Patteri</title>
+</head>
 <body>
-<h1>hello, world</h1>
 <div id="patteri"></div>
+<div id="config">
+  <label for="repo">Git repository</label>
+  <input id="repo" type="text" placeholder="user/repo"/>
+  <label for="token">Authentication token</label>
+  <input id="token" type="text" placeholder="auth-token"/>
+  <button id="go" onclick="getBuilds()">Go</button>
+</div>
 <script src="./patteri.js"></script>
 </body>
 </html>
