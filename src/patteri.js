@@ -4,6 +4,22 @@ const showConfig = document.getElementById("showConfig")
 let running
 let token
 let repo
+let timer
+
+setStopped()
+
+if (window.location.hostname === "localhost") {
+  const searchParams = new URLSearchParams(window.location.search)
+  token = searchParams.get("token")
+  repo = searchParams.get("repo")
+
+  if (token !== null && token !== "" && repo !== null && repo !== "") {
+    document.getElementById("token").value = token
+    document.getElementById("repo").value = repo
+    setRunning()
+    getBuilds(token, repo)
+  }
+}
 
 // eslint-disable-next-line no-unused-vars
 function enableConfig() {
@@ -57,34 +73,20 @@ async function getBuildsUsingConfig() {
   token = document.getElementById("token").value
   repo = document.getElementById("repo").value
   setRunning()
-  await getBuilds()
-}
-
-setStopped()
-
-const searchParams = new URLSearchParams(window.location.search)
-token = searchParams.get("token")
-repo = searchParams.get("repo")
-
-if (
-  window.location.hostname === "localhost" &&
-  token !== null &&
-  token !== "" &&
-  repo !== null &&
-  repo !== ""
-) {
-  setRunning()
-  getBuilds(token, repo)
+  getBuilds()
 }
 
 function setRunning() {
   "use strict"
+  timer = setInterval(
+    getBuilds,
+    document.getElementById("interval").value * 1000
+  )
   running = true
 }
 
 function setStopped() {
   "use strict"
   running = false
+  clearInterval(timer)
 }
-
-setInterval(getBuilds, 60000)
