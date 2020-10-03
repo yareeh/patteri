@@ -1,3 +1,13 @@
+#patteri {
+  display: flex;
+  flex-wrap: wrap;
+  height: 90%;
+}
+
+#patteri img {
+  flex-basis: 50%;
+}
+
 .hide {
   display: none;
 }
