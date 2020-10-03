@@ -1,7 +1,20 @@
 const patteri = document.getElementById("patteri")
+const config = document.getElementById("config")
+const showConfig = document.getElementById("showConfig")
+
+// eslint-disable-next-line no-unused-vars
+function enableConfig() {
+  "use strict"
+
+  config.removeAttribute("class")
+  showConfig.setAttribute("class", "hide")
+}
 
 async function getBuilds(token, repo) {
   "use strict"
+
+  config.setAttribute("class", "hide")
+  showConfig.removeAttribute("class")
 
   const headers = new Headers({
     Authorization: `token ${token}`,

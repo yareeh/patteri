@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <title>Patteri</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div id="patteri"></div>
-<div id="config">
+<div id="config" class="showConfig">
   <label for="repo">Git repository</label>
   <input id="repo" type="text" placeholder="user/repo"/>
   <label for="token">Authentication token</label>
   <input id="token" type="text" placeholder="auth-token"/>
   <button id="go" onclick="getBuildsUsingConfig()">Go</button>
 </div>
+<div id="showConfig" class="hide"><button onclick="enableConfig()">⚙️</button></div>
 <script src="./patteri.js"></script>
 </body>
 </html>
