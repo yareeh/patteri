@@ -1,0 +1,17 @@
+name: lint
+
+on: push
+
+jobs:
+  test:
+    name: Run all tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: 'install dependencies'
+        run: yarn --pure-lockfile --non-interactive install
+        shell: bash
+      - name: 'lint'
+        run: yarn --non-interactive lint
+        shell: bash
