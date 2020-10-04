@@ -188,7 +188,7 @@ async function doStuff(token, repo) {
 
   const latestRuns = {}
   freshRuns.forEach((r) => {
-    const workflowBranch = `${r.id}:${r.head_branch}`
+    const workflowBranch = `${r.workflow_id}:${r.head_branch}`
     if (latestRuns[workflowBranch]) {
       if (latestRuns[workflowBranch].updated < r.updated)
         latestRuns[workflowBranch] = r
@@ -216,4 +216,4 @@ async function doStuff(token, repo) {
   console.log("done")
 }
 
-doStuff(token, repo)
+processWorkflows(token, repo)
