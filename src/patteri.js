@@ -1,6 +1,7 @@
 const patteri = document.getElementById("patteri")
 const config = document.getElementById("config")
 const showConfig = document.getElementById("showConfig")
+const errorLabel = document.getElementById("error")
 let running
 let token
 let repo
@@ -41,14 +42,23 @@ async function getBuilds() {
   const headers = new Headers({
     Authorization: `token ${token}`,
   })
-  const response = await fetch(
-    `https://api.github.com/repos/${repo}/actions/workflows`,
-    { headers }
-  ).catch((err) => {
+  const url = `https://api.github.com/repos/${repo}/actions/workflows`
+  const response = await fetch(url, { headers }).catch((err) => {
     setStopped()
-    // eslint-disable-next-line no-console
-    console.log(err)
+    const error = document.createTextNode(err.toString())
+    errorLabel.appendChild(error)
   })
+
+  if (response.status !== 200) {
+    setStopped()
+    const error = document.createTextNode(
+      `Getting builds from ${url} failed with status ${response.status} ${
+        response.statusText
+      } ${await response.text()}`
+    )
+    errorLabel.appendChild(error)
+  }
+
   const workflows = (await response.json()).workflows
 
   const height = (window.innerHeight * 0.9) / (workflows.length / 2)
@@ -82,7 +92,7 @@ function setRunning() {
     getBuilds,
     document.getElementById("interval").value * 1000
   )
-  running = true
+  running = false
 }
 
 function setStopped() {
@@ -90,3 +100,120 @@ function setStopped() {
   running = false
   clearInterval(timer)
 }
+
+async function doStuff(token, repo) {
+  console.log("doing stuff")
+  const headers = new Headers({
+    Authorization: `token ${token}`,
+  })
+  const url = `https://api.github.com/repos/${repo}/actions/workflows`
+
+  const response = await fetch(url, { headers })
+
+  const workflows = (await response.json()).workflows.filter(
+    (w) => w.state === "active"
+  )
+  const workflowMap = {}
+  workflows.forEach((w) => {
+    workflowMap[w.id] = w
+  })
+  const workflowUrls = workflows.map((w) => w.url)
+  console.log(workflowUrls)
+  const responses = await Promise.all(
+    workflowUrls.map(async (u) => {
+      const res = await fetch(`${u}/runs`, { headers })
+      const json = await res.json()
+      return json.workflow_runs
+    })
+  )
+
+  console.log(responses.length)
+  console.log(responses[0])
+
+  const runs = responses.flatMap((runs) => {
+    return runs.map((run) => {
+      const {
+        conclusion,
+        created_at,
+        updated_at,
+        head_branch,
+        workflow_id,
+        status,
+        head_commit,
+        id,
+        url,
+      } = run
+
+      const created = new Date(Date.parse(created_at))
+      const updated = new Date(Date.parse(updated_at))
+
+      let conclusionValue
+
+      switch (conclusion) {
+        case "failure":
+          conclusionValue = -1
+          break
+        case "cancelled":
+          conclusionValue = -0.5
+          break
+        case "success":
+          conclusionValue = 1
+          break
+        default:
+          conclusionValue = 0
+      }
+
+      return {
+        conclusion,
+        conclusionValue,
+        created,
+        updated,
+        head_branch,
+        workflow_id,
+        status,
+        head_commit,
+        id,
+        url,
+        workflow: workflowMap[workflow_id],
+      }
+    })
+  })
+
+  const pivot = new Date(Date.now())
+  pivot.setDate(pivot.getDay() - 5)
+  console.log(pivot)
+
+  const freshRuns = runs.filter((r) => r.updated > pivot)
+  console.log(`runs: ${runs.length} fresh: ${freshRuns.length}`)
+
+  const latestRuns = {}
+  freshRuns.forEach((r) => {
+    const workflowBranch = `${r.id}:${r.head_branch}`
+    if (latestRuns[workflowBranch]) {
+      if (latestRuns[workflowBranch].updated < r.updated)
+        latestRuns[workflowBranch] = r
+    } else {
+      latestRuns[workflowBranch] = r
+    }
+  })
+
+  console.log(latestRuns)
+  const latest = Object.values(latestRuns)
+  latest.sort((a, b) => {
+    if (a.conclusionValue !== b.conclusionValue) {
+      return a.conclusionValue - b.conclusionValue
+    }
+    if (a.head_branch === "master" && b.head_branch !== "master") {
+      return -1
+    }
+    if (a.head_branch !== "master" && b.head_branch === "master") {
+      return 1
+    }
+    return b.updated - a.updated
+  })
+  console.log(latest)
+
+  console.log("done")
+}
+
+doStuff(token, repo)
