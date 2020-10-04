@@ -7,6 +7,14 @@ let token
 let repo
 let timer
 
+function handleError(err) {
+  setStopped()
+  // eslint-disable-next-line no-console
+  console.log(err)
+  errorLabel.appendChild(document.createTextNode(err))
+  throw err
+}
+
 setStopped()
 
 if (window.location.hostname === "localhost") {
@@ -18,10 +26,7 @@ if (window.location.hostname === "localhost") {
     document.getElementById("token").value = token
     document.getElementById("repo").value = repo
     setRunning()
-    processWorkflows().catch((e) => {
-      setStopped()
-      errorLabel.appendChild(document.createTextNode(e.toString()))
-    })
+    processWorkflows().catch(handleError)
   }
 }
 
@@ -58,6 +63,9 @@ function setStopped() {
 async function getWorkflows(repo, headers) {
   const url = `https://api.github.com/repos/${repo}/actions/workflows`
   const response = await fetch(url, { headers })
+  if (response.status !== 200) {
+    throw new Error(`${url} ${response.status} ${response.statusText}`)
+  }
   return (await response.json()).workflows.filter((w) => w.state === "active")
 }
 
@@ -72,8 +80,13 @@ function getWorkflowMap(workflows) {
 async function getWorkflowRuns(workflowUrls, headers) {
   return await Promise.all(
     workflowUrls.map(async (u) => {
-      const res = await fetch(`${u}/runs`, { headers })
-      const json = await res.json()
+      const url = `${u}/runs`
+      const response = await fetch(url, { headers })
+      if (response.status !== 200) {
+        throw new Error(`${url}  ${response.status} ${response.statusText}`)
+      }
+
+      const json = await response.json()
       return json.workflow_runs
     })
   )
@@ -168,10 +181,12 @@ async function processWorkflows() {
   const headers = new Headers({
     Authorization: `token ${token}`,
   })
-  const workflows = await getWorkflows(repo, headers)
+  const workflows = await getWorkflows(repo, headers).catch(handleError)
   const workflowMap = getWorkflowMap(workflows)
   const workflowUrls = workflows.map((w) => w.url)
-  const workflowRuns = await getWorkflowRuns(workflowUrls, headers)
+  const workflowRuns = await getWorkflowRuns(workflowUrls, headers).catch(
+    handleError
+  )
 
   const runList = flatMapRuns(workflowRuns, workflowMap)
   const latest = getLatestForWorkflowAndBranch(runList)
