@@ -69,6 +69,15 @@ async function getWorkflows(repo, headers) {
   return (await response.json()).workflows.filter((w) => w.state === "active")
 }
 
+async function getBranches(repo, headers) {
+  const url = `https://api.github.com/repos/${repo}/branches`
+  const response = await fetch(url, { headers })
+  if (response.status !== 200) {
+    throw new Error(`${url} ${response.status} ${response.statusText}`)
+  }
+  return (await response.json()).map((b) => b.name)
+}
+
 function getWorkflowMap(workflows) {
   const workflowMap = {}
   workflows.forEach((w) => {
@@ -143,17 +152,19 @@ function flatMapRuns(workflowRuns, workflowMap) {
   })
 }
 
-function getLatestForWorkflowAndBranch(runList) {
+function getLatestForWorkflowAndBranch(runList, branches) {
   const latestRuns = {}
-  runList.forEach((r) => {
-    const workflowBranch = `${r.workflow_id}:${r.head_branch}`
-    if (latestRuns[workflowBranch]) {
-      if (latestRuns[workflowBranch].updated < r.updated)
+  runList
+    .filter((r) => branches.indexOf(r.head_branch) >= 0)
+    .forEach((r) => {
+      const workflowBranch = `${r.workflow_id}:${r.head_branch}`
+      if (latestRuns[workflowBranch]) {
+        if (latestRuns[workflowBranch].updated < r.updated)
+          latestRuns[workflowBranch] = r
+      } else {
         latestRuns[workflowBranch] = r
-    } else {
-      latestRuns[workflowBranch] = r
-    }
-  })
+      }
+    })
 
   return Object.values(latestRuns)
 }
@@ -187,9 +198,10 @@ async function processWorkflows() {
   const workflowRuns = await getWorkflowRuns(workflowUrls, headers).catch(
     handleError
   )
+  const branches = await getBranches(repo, headers)
 
   const runList = flatMapRuns(workflowRuns, workflowMap)
-  const latest = getLatestForWorkflowAndBranch(runList)
+  const latest = getLatestForWorkflowAndBranch(runList, branches)
   latest.sort(compareRuns)
 
   const noSuccess = latest
