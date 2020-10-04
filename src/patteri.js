@@ -188,18 +188,16 @@ function getLatestForWorkflowAndBranch(runList) {
 }
 
 function compareRuns(a, b) {
-  return (a, b) => {
-    if (a.conclusionValue !== b.conclusionValue) {
-      return a.conclusionValue - b.conclusionValue
-    }
-    if (a.head_branch === "master" && b.head_branch !== "master") {
-      return -1
-    }
-    if (a.head_branch !== "master" && b.head_branch === "master") {
-      return 1
-    }
-    return b.updated - a.updated
-  };
+  if (a.conclusionValue !== b.conclusionValue) {
+    return a.conclusionValue - b.conclusionValue
+  }
+  if (a.head_branch === "master" && b.head_branch !== "master") {
+    return -1
+  }
+  if (a.head_branch !== "master" && b.head_branch === "master") {
+    return 1
+  }
+  return b.updated - a.updated
 }
 
 async function processWorkflows(token, repo) {
