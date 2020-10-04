@@ -1,13 +1,59 @@
-#patteri {
-  display: flex;
-  flex-wrap: wrap;
-  height: 90%;
-}
-
-#patteri img {
-  flex-basis: 50%;
+body {
+  font-family: Sans-Serif;
 }
 
 .hide {
   display: none;
+}
+
+#patteri {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  border: black 1px solid;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  background: aquamarine;
+}
+
+.failed-row {
+  flex-grow: 10;
+}
+
+.success-row {
+  flex-grow: 1;
+}
+
+.run-container {
+  display: flex;
+  flex-grow: 1;
+  flex-basis: 50%;
+}
+
+.run {
+  display: flex;
+  flex-grow: 1;
+  border-radius: 8px;
+  padding: 8px;
+  margin: 4px;
+}
+
+.success {
+  background: green;
+}
+
+.failure {
+  background: red;
+}
+
+.title {
+  color: white;
+  font-weight: bold;
+  flex-basis: 100%;
+  display: grid;
+  align-items: center;
+  text-align: center;
 }

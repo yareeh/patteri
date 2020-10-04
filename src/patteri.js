@@ -96,10 +96,7 @@ function setStopped() {
 async function getWorkflows(repo, headers) {
   const url = `https://api.github.com/repos/${repo}/actions/workflows`
   const response = await fetch(url, { headers })
-  const workflows = (await response.json()).workflows.filter(
-    (w) => w.state === "active"
-  )
-  return workflows
+  return (await response.json()).workflows.filter((w) => w.state === "active")
 }
 
 function getWorkflowMap(workflows) {
@@ -183,7 +180,6 @@ function getLatestForWorkflowAndBranch(runList) {
     }
   })
 
-  console.log(latestRuns)
   return Object.values(latestRuns)
 }
 
@@ -213,34 +209,74 @@ async function processWorkflows(token, repo) {
   const workflowUrls = workflows.map((w) => w.url)
   const workflowRuns = await getWorkflowRuns(workflowUrls, headers)
 
-  console.log(workflowRuns[0])
-
   const runList = flatMapRuns(workflowRuns, workflowMap)
   const latest = getLatestForWorkflowAndBranch(runList)
   latest.sort(compareRuns)
-  console.log(latest)
 
-  const elements = latest.map(toElement)
+  const noSuccess = latest
+    .filter((r) => !r.conclusion || r.conclusion !== "success")
+    .map(toElement)
+  const success = latest
+    .filter((r) => r.conclusion && r.conclusion === "success")
+    .map(toElement)
+
+  const rows = []
+  if (noSuccess.length % 2 === 1) {
+    rows.push(createRow("row failed-row", [noSuccess.shift()]))
+  }
+
+  ;[...Array(noSuccess.length / 2).keys()].forEach(() => {
+    rows.push(
+      createRow("row failed-row", [noSuccess.shift(), noSuccess.shift()])
+    )
+  })
+
+  const remainder = success.length % 4
+  if (remainder > 0) {
+    const firstRow = []
+    ;[...Array(remainder).keys()].forEach(() => firstRow.push(success.shift()))
+    rows.push(createRow("row success-row", firstRow))
+  }
+
+  ;[...Array(success.length / 4).keys()].forEach(() => {
+    rows.push(
+      createRow("row success-row", [
+        success.shift(),
+        success.shift(),
+        success.shift(),
+        success.shift(),
+      ])
+    )
+  })
 
   Array.from(document.getElementsByClassName("build")).forEach((b) =>
     b.remove()
   )
 
-  elements.forEach((e) => {
+  rows.forEach((e) => {
     patteri.appendChild(e)
   })
+}
 
-  console.log("done")
+function createRow(className, elements) {
+  const div = document.createElement("div")
+  div.setAttribute("class", className)
+  elements.forEach((e) => div.appendChild(e))
+  return div
 }
 
 function toElement(run) {
-  const div = document.createElement("div")
-  div.setAttribute("class", `run ${run.conclusion || run.status}`)
+  const element = document.createElement("div")
+  element.setAttribute("class", `run-container`)
+  const runContainer = document.createElement("div")
+  runContainer.setAttribute("class", `run ${run.conclusion || run.status}`)
   const title = document.createElement("span")
+  title.setAttribute("class", "title")
   const titleText = document.createTextNode(
     `${run.workflow.name} @ ${run.head_branch}`
   )
   title.appendChild(titleText)
-  div.appendChild(title)
-  return div
+  runContainer.appendChild(title)
+  element.appendChild(runContainer)
+  return element
 }
