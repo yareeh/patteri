@@ -120,27 +120,18 @@ function getWorkflowMap(workflows) {
   return workflowMap
 }
 
-async function processWorkflows(token, repo) {
-  const headers = new Headers({
-    Authorization: `token ${token}`,
-  })
-
-  const workflows = await getWorkflows(repo, headers)
-  const workflowMap = getWorkflowMap(workflows)
-
-  const workflowUrls = workflows.map((w) => w.url)
-  const responses = await Promise.all(
+async function getWorkflowRuns(workflowUrls, headers) {
+  return await Promise.all(
     workflowUrls.map(async (u) => {
       const res = await fetch(`${u}/runs`, { headers })
       const json = await res.json()
       return json.workflow_runs
     })
   )
+}
 
-  console.log(responses.length)
-  console.log(responses[0])
-
-  const runs = responses.flatMap((runs) => {
+function flatMapRuns(workflowRuns, workflowMap) {
+  return workflowRuns.flatMap((runs) => {
     return runs.map((run) => {
       const {
         conclusion,
@@ -188,16 +179,11 @@ async function processWorkflows(token, repo) {
       }
     })
   })
+}
 
-  const pivot = new Date(Date.now())
-  pivot.setDate(pivot.getDay() - 5)
-  console.log(pivot)
-
-  const freshRuns = runs.filter((r) => r.updated > pivot)
-  console.log(`runs: ${runs.length} fresh: ${freshRuns.length}`)
-
+function getLatestForWorkflowAndBranch(runList) {
   const latestRuns = {}
-  freshRuns.forEach((r) => {
+  runList.forEach((r) => {
     const workflowBranch = `${r.workflow_id}:${r.head_branch}`
     if (latestRuns[workflowBranch]) {
       if (latestRuns[workflowBranch].updated < r.updated)
@@ -208,8 +194,11 @@ async function processWorkflows(token, repo) {
   })
 
   console.log(latestRuns)
-  const latest = Object.values(latestRuns)
-  latest.sort((a, b) => {
+  return Object.values(latestRuns)
+}
+
+function compareRuns(a, b) {
+  return (a, b) => {
     if (a.conclusionValue !== b.conclusionValue) {
       return a.conclusionValue - b.conclusionValue
     }
@@ -220,7 +209,25 @@ async function processWorkflows(token, repo) {
       return 1
     }
     return b.updated - a.updated
+  };
+}
+
+async function processWorkflows(token, repo) {
+  const headers = new Headers({
+    Authorization: `token ${token}`,
   })
+
+  const workflows = await getWorkflows(repo, headers)
+  const workflowMap = getWorkflowMap(workflows)
+
+  const workflowUrls = workflows.map((w) => w.url)
+  const workflowRuns = await getWorkflowRuns(workflowUrls, headers)
+
+  console.log(workflowRuns[0])
+
+  const runList = flatMapRuns(workflowRuns, workflowMap)
+  const latest = getLatestForWorkflowAndBranch(runList)
+  latest.sort(compareRuns)
   console.log(latest)
 
   console.log("done")
