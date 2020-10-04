@@ -24,16 +24,12 @@ if (window.location.hostname === "localhost") {
 
 // eslint-disable-next-line no-unused-vars
 function enableConfig() {
-  "use strict"
-
   setStopped()
   config.removeAttribute("class")
   showConfig.setAttribute("class", "hide")
 }
 
 async function getBuilds() {
-  "use strict"
-
   if (!running) return
 
   config.setAttribute("class", "hide")
@@ -78,8 +74,6 @@ async function getBuilds() {
 
 // eslint-disable-next-line no-unused-vars
 async function getBuildsUsingConfig() {
-  "use strict"
-
   token = document.getElementById("token").value
   repo = document.getElementById("repo").value
   setRunning()
@@ -87,7 +81,6 @@ async function getBuildsUsingConfig() {
 }
 
 function setRunning() {
-  "use strict"
   timer = setInterval(
     getBuilds,
     document.getElementById("interval").value * 1000
@@ -96,16 +89,13 @@ function setRunning() {
 }
 
 function setStopped() {
-  "use strict"
   running = false
   clearInterval(timer)
 }
 
 async function getWorkflows(repo, headers) {
   const url = `https://api.github.com/repos/${repo}/actions/workflows`
-
   const response = await fetch(url, { headers })
-
   const workflows = (await response.json()).workflows.filter(
     (w) => w.state === "active"
   )

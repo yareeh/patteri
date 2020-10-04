@@ -19,7 +19,6 @@
         "semi": false
       }
     ],
-    "strict": "error",
     "no-console": "error"
   }
 }
