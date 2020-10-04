@@ -18,7 +18,10 @@ if (window.location.hostname === "localhost") {
     document.getElementById("token").value = token
     document.getElementById("repo").value = repo
     setRunning()
-    processWorkflows(token, repo)
+    processWorkflows().catch((e) => {
+      setStopped()
+      errorLabel.appendChild(document.createTextNode(e.toString()))
+    })
   }
 }
 
@@ -29,63 +32,22 @@ function enableConfig() {
   showConfig.setAttribute("class", "hide")
 }
 
-async function getBuilds() {
-  if (!running) return
-
-  config.setAttribute("class", "hide")
-  showConfig.removeAttribute("class")
-
-  const headers = new Headers({
-    Authorization: `token ${token}`,
-  })
-  const url = `https://api.github.com/repos/${repo}/actions/workflows`
-  const response = await fetch(url, { headers }).catch((err) => {
-    setStopped()
-    const error = document.createTextNode(err.toString())
-    errorLabel.appendChild(error)
-  })
-
-  if (response.status !== 200) {
-    setStopped()
-    const error = document.createTextNode(
-      `Getting builds from ${url} failed with status ${response.status} ${
-        response.statusText
-      } ${await response.text()}`
-    )
-    errorLabel.appendChild(error)
-  }
-
-  const workflows = (await response.json()).workflows
-
-  const height = (window.innerHeight * 0.9) / (workflows.length / 2)
-
-  Array.from(document.getElementsByClassName("build")).forEach((b) =>
-    b.remove()
-  )
-
-  workflows.forEach((w) => {
-    const img = document.createElement("img")
-    img.setAttribute("src", w.badge_url)
-    img.setAttribute("height", `${height}px`)
-    img.setAttribute("class", "build")
-    patteri.appendChild(img)
-  })
-}
-
 // eslint-disable-next-line no-unused-vars
 async function getBuildsUsingConfig() {
   token = document.getElementById("token").value
   repo = document.getElementById("repo").value
   setRunning()
-  getBuilds()
+  processWorkflows()
 }
 
 function setRunning() {
   timer = setInterval(
-    getBuilds,
+    processWorkflows,
     document.getElementById("interval").value * 1000
   )
-  running = false
+  config.setAttribute("class", "hide")
+  showConfig.removeAttribute("class")
+  running = true
 }
 
 function setStopped() {
@@ -200,7 +162,9 @@ function compareRuns(a, b) {
   return b.updated - a.updated
 }
 
-async function processWorkflows(token, repo) {
+async function processWorkflows() {
+  if (!running) return
+
   const headers = new Headers({
     Authorization: `token ${token}`,
   })
@@ -249,9 +213,7 @@ async function processWorkflows(token, repo) {
     )
   })
 
-  Array.from(document.getElementsByClassName("build")).forEach((b) =>
-    b.remove()
-  )
+  Array.from(patteri.childNodes).forEach((n) => n.remove())
 
   rows.forEach((e) => {
     patteri.appendChild(e)
