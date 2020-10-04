@@ -187,14 +187,18 @@ function getLatestForWorkflowAndBranch(runList) {
   return Object.values(latestRuns)
 }
 
+function isMain(branchName) {
+  return branchName === "main" || branchName === "master"
+}
+
 function compareRuns(a, b) {
   if (a.conclusionValue !== b.conclusionValue) {
     return a.conclusionValue - b.conclusionValue
   }
-  if (a.head_branch === "master" && b.head_branch !== "master") {
+  if (isMain(a.head_branch) && !isMain(b.head_branch)) {
     return -1
   }
-  if (a.head_branch !== "master" && b.head_branch === "master") {
+  if (!isMain(a.head_branch) && isMain(b.head_branch)) {
     return 1
   }
   return b.updated - a.updated
