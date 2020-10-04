@@ -18,7 +18,7 @@ if (window.location.hostname === "localhost") {
     document.getElementById("token").value = token
     document.getElementById("repo").value = repo
     setRunning()
-    getBuilds(token, repo)
+    processWorkflows(token, repo)
   }
 }
 
@@ -208,10 +208,8 @@ async function processWorkflows(token, repo) {
   const headers = new Headers({
     Authorization: `token ${token}`,
   })
-
   const workflows = await getWorkflows(repo, headers)
   const workflowMap = getWorkflowMap(workflows)
-
   const workflowUrls = workflows.map((w) => w.url)
   const workflowRuns = await getWorkflowRuns(workflowUrls, headers)
 
@@ -222,7 +220,27 @@ async function processWorkflows(token, repo) {
   latest.sort(compareRuns)
   console.log(latest)
 
+  const elements = latest.map(toElement)
+
+  Array.from(document.getElementsByClassName("build")).forEach((b) =>
+    b.remove()
+  )
+
+  elements.forEach((e) => {
+    patteri.appendChild(e)
+  })
+
   console.log("done")
 }
 
-processWorkflows(token, repo)
+function toElement(run) {
+  const div = document.createElement("div")
+  div.setAttribute("class", `run ${run.conclusion || run.status}`)
+  const title = document.createElement("span")
+  const titleText = document.createTextNode(
+    `${run.workflow.name} @ ${run.head_branch}`
+  )
+  title.appendChild(titleText)
+  div.appendChild(title)
+  return div
+}
