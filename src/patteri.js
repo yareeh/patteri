@@ -101,7 +101,7 @@ function setStopped() {
   clearInterval(timer)
 }
 
-async function doStuff(token, repo) {
+async function processWorkflows(token, repo) {
   console.log("doing stuff")
   const headers = new Headers({
     Authorization: `token ${token}`,
