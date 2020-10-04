@@ -195,22 +195,17 @@ async function processWorkflows() {
     )
   })
 
-  const remainder = success.length % 4
+  const remainder = success.length % 8
   if (remainder > 0) {
     const firstRow = []
     ;[...Array(remainder).keys()].forEach(() => firstRow.push(success.shift()))
     rows.push(createRow("row success-row", firstRow))
   }
 
-  ;[...Array(success.length / 4).keys()].forEach(() => {
-    rows.push(
-      createRow("row success-row", [
-        success.shift(),
-        success.shift(),
-        success.shift(),
-        success.shift(),
-      ])
-    )
+  ;[...Array(success.length / 8).keys()].forEach(() => {
+    const r = []
+    ;[...Array(8).keys()].forEach(() => r.push(success.shift()))
+    rows.push(createRow("row success-row", r))
   })
 
   Array.from(patteri.childNodes).forEach((n) => n.remove())

@@ -39,10 +39,15 @@ body {
   padding: 8px;
   margin: 4px;
   color: white;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .success {
   background: green;
+  font-weight: lighter;
+  font-size: 10px;
+  padding: 2px;
 }
 
 .in_progress {
@@ -71,7 +76,8 @@ body {
 
 .title {
   color: inherit;
-  font-weight: bold;
+  font-weight: inherit;
+  font-size: inherit;
   flex-basis: 100%;
   display: grid;
   align-items: center;
