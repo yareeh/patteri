@@ -101,11 +101,7 @@ function setStopped() {
   clearInterval(timer)
 }
 
-async function processWorkflows(token, repo) {
-  console.log("doing stuff")
-  const headers = new Headers({
-    Authorization: `token ${token}`,
-  })
+async function getWorkflows(repo, headers) {
   const url = `https://api.github.com/repos/${repo}/actions/workflows`
 
   const response = await fetch(url, { headers })
@@ -113,12 +109,26 @@ async function processWorkflows(token, repo) {
   const workflows = (await response.json()).workflows.filter(
     (w) => w.state === "active"
   )
+  return workflows
+}
+
+function getWorkflowMap(workflows) {
   const workflowMap = {}
   workflows.forEach((w) => {
     workflowMap[w.id] = w
   })
+  return workflowMap
+}
+
+async function processWorkflows(token, repo) {
+  const headers = new Headers({
+    Authorization: `token ${token}`,
+  })
+
+  const workflows = await getWorkflows(repo, headers)
+  const workflowMap = getWorkflowMap(workflows)
+
   const workflowUrls = workflows.map((w) => w.url)
-  console.log(workflowUrls)
   const responses = await Promise.all(
     workflowUrls.map(async (u) => {
       const res = await fetch(`${u}/runs`, { headers })
