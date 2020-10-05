@@ -78,7 +78,7 @@ body {
   background: pink;
 }
 
-.title {
+.title, .title a {
   color: inherit;
   font-weight: inherit;
   font-size: inherit;

@@ -1,5 +1,5 @@
 import { getConfig, isConfigStored, storeConfig } from "./storage.js"
-import { isMain, toElementData } from "./util.js"
+import { isMain, runMapper, toElementData } from "./util.js"
 
 const patteri = document.getElementById("patteri")
 const config = document.getElementById("config")
@@ -117,52 +117,7 @@ async function getWorkflowRuns(workflowUrls, headers) {
 
 function flatMapRuns(workflowRuns, workflowMap) {
   return workflowRuns.flatMap((runs) => {
-    return runs.map((run) => {
-      const {
-        conclusion,
-        created_at,
-        updated_at,
-        head_branch,
-        workflow_id,
-        status,
-        head_commit,
-        id,
-        url,
-      } = run
-
-      const created = new Date(Date.parse(created_at))
-      const updated = new Date(Date.parse(updated_at))
-
-      var conclusionValue
-
-      switch (conclusion) {
-        case "failure":
-          conclusionValue = -1
-          break
-        case "cancelled":
-          conclusionValue = -0.5
-          break
-        case "success":
-          conclusionValue = 1
-          break
-        default:
-          conclusionValue = 0
-      }
-
-      return {
-        conclusion,
-        conclusionValue,
-        created,
-        updated,
-        head_branch,
-        workflow_id,
-        status,
-        head_commit,
-        id,
-        url,
-        workflow: workflowMap[workflow_id],
-      }
-    })
+    return runs.map(runMapper(workflowMap))
   })
 }
 
@@ -269,8 +224,11 @@ function toElement(run) {
   runContainer.setAttribute("class", data.className)
   const title = document.createElement("span")
   title.setAttribute("class", "title")
+  const link = document.createElement("a")
+  link.setAttribute("href", data.url)
   const titleText = document.createTextNode(`${data.name} @ ${data.branch}`)
-  title.appendChild(titleText)
+  link.appendChild(titleText)
+  title.appendChild(link)
   runContainer.appendChild(title)
   element.appendChild(runContainer)
   return element
