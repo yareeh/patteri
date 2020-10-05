@@ -13,5 +13,5 @@ jobs:
         run: yarn --pure-lockfile --non-interactive install
         shell: bash
       - name: 'lint'
-        run: yarn --non-interactive lint
+        run: yarn --non-interactive test
         shell: bash
