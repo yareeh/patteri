@@ -74,6 +74,10 @@ body {
   background: red;
 }
 
+.failure.dev {
+  background: pink;
+}
+
 .title {
   color: inherit;
   font-weight: inherit;

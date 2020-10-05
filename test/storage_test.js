@@ -5,12 +5,12 @@ import {
   storeConfig,
 } from "../src/storage.js"
 import "mock-local-storage"
+
 import chai from "chai"
+const assert = chai.assert
 
 global.window = {}
 window.localStorage = global.localStorage
-
-const assert = chai.assert
 
 describe("Storage", () => {
   const config = { token: "asdf", repo: "foo/bar" }

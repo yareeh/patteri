@@ -1,4 +1,5 @@
 import { getConfig, isConfigStored, storeConfig } from "./storage.js"
+import { isMain, toElementData } from "./util.js"
 
 const patteri = document.getElementById("patteri")
 const config = document.getElementById("config")
@@ -182,10 +183,6 @@ function getLatestForWorkflowAndBranch(runList, branches) {
   return Object.values(latestRuns)
 }
 
-function isMain(branchName) {
-  return branchName === "main" || branchName === "master"
-}
-
 function compareRuns(a, b) {
   if (a.conclusionValue !== b.conclusionValue) {
     return a.conclusionValue - b.conclusionValue
@@ -265,15 +262,14 @@ function createRow(className, elements) {
 }
 
 function toElement(run) {
+  const data = toElementData(run)
   const element = document.createElement("div")
   element.setAttribute("class", `run-container`)
   const runContainer = document.createElement("div")
-  runContainer.setAttribute("class", `run ${run.conclusion || run.status}`)
+  runContainer.setAttribute("class", data.className)
   const title = document.createElement("span")
   title.setAttribute("class", "title")
-  const titleText = document.createTextNode(
-    `${run.workflow.name} @ ${run.head_branch}`
-  )
+  const titleText = document.createTextNode(`${data.name} @ ${data.branch}`)
   title.appendChild(titleText)
   runContainer.appendChild(title)
   element.appendChild(runContainer)
