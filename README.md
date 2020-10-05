@@ -9,3 +9,8 @@ All kinds of pull reqs are welcome. Just don't add any dependencies.
 
 One version is being hosted at http://yareeh.github.io/patteri/ but you can also host
 it locally running `yarn serve`.
+
+## Usage
+
+Enter repository name and your personal Github authentication token to the form and press go.
+The page will store the config to local storage for the next time.
