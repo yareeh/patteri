@@ -1,11 +1,35 @@
+import { getConfig, isConfigStored, storeConfig } from "./storage.js"
+
 const patteri = document.getElementById("patteri")
 const config = document.getElementById("config")
 const showConfig = document.getElementById("showConfig")
 const errorLabel = document.getElementById("error")
+const tokenElement = document.getElementById("token")
+const repoElement = document.getElementById("repo")
+
 var running
-var token
-var repo
 var timer
+var configuration = {}
+
+setStopped()
+
+if (isConfigStored()) {
+  configuration = getConfig()
+  tokenElement.value = configuration.token
+  repoElement.value = configuration.repo
+  setRunning()
+  processWorkflows().catch(handleError)
+} else if (window.location.hostname === "localhost") {
+  const searchParams = new URLSearchParams(window.location.search)
+  const token = searchParams.get("token")
+  const repo = searchParams.get("repo")
+
+  if (token !== null && token !== "" && repo !== null && repo !== "") {
+    configuration = { token, repo }
+    setRunning()
+    processWorkflows().catch(handleError)
+  }
+}
 
 function handleError(err) {
   setStopped()
@@ -15,32 +39,17 @@ function handleError(err) {
   throw err
 }
 
-setStopped()
-
-if (window.location.hostname === "localhost") {
-  const searchParams = new URLSearchParams(window.location.search)
-  token = searchParams.get("token")
-  repo = searchParams.get("repo")
-
-  if (token !== null && token !== "" && repo !== null && repo !== "") {
-    document.getElementById("token").value = token
-    document.getElementById("repo").value = repo
-    setRunning()
-    processWorkflows().catch(handleError)
-  }
-}
-
 // eslint-disable-next-line no-unused-vars
-function enableConfig() {
+window.enableConfig = function enableConfig() {
   setStopped()
   config.removeAttribute("class")
   showConfig.setAttribute("class", "hide")
 }
 
 // eslint-disable-next-line no-unused-vars
-async function getBuildsUsingConfig() {
-  token = document.getElementById("token").value
-  repo = document.getElementById("repo").value
+window.getBuildsUsingConfig = async function getBuildsUsingConfig() {
+  configuration.token = tokenElement.value
+  configuration.repo = repoElement.value
   setRunning()
   processWorkflows()
 }
@@ -50,6 +59,9 @@ function setRunning() {
     processWorkflows,
     document.getElementById("interval").value * 1000
   )
+  storeConfig(configuration)
+  tokenElement.value = configuration.token
+  repoElement.value = configuration.repo
   config.setAttribute("class", "hide")
   showConfig.removeAttribute("class")
   errorLabel.textContent = ""
@@ -191,15 +203,17 @@ async function processWorkflows() {
   if (!running) return
 
   const headers = new Headers({
-    Authorization: `token ${token}`,
+    Authorization: `token ${configuration.token}`,
   })
-  const workflows = await getWorkflows(repo, headers).catch(handleError)
+  const workflows = await getWorkflows(configuration.repo, headers).catch(
+    handleError
+  )
   const workflowMap = getWorkflowMap(workflows)
   const workflowUrls = workflows.map((w) => w.url)
   const workflowRuns = await getWorkflowRuns(workflowUrls, headers).catch(
     handleError
   )
-  const branches = await getBranches(repo, headers)
+  const branches = await getBranches(configuration.repo, headers)
 
   const runList = flatMapRuns(workflowRuns, workflowMap)
   const latest = getLatestForWorkflowAndBranch(runList, branches)

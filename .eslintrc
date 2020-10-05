@@ -8,6 +8,10 @@
     "ecmaVersion": 2019,
     "sourceType": "module"
   },
+  "globals": {
+    "window": true,
+    "global": true
+  },
   "plugins": [
     "prettier"
   ],
