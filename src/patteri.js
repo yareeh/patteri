@@ -7,14 +7,6 @@ var token
 var repo
 var timer
 
-function handleError(err) {
-  setStopped()
-  // eslint-disable-next-line no-console
-  console.log(err)
-  errorLabel.textContent = err
-  throw err
-}
-
 setStopped()
 
 if (window.location.hostname === "localhost") {
@@ -28,6 +20,14 @@ if (window.location.hostname === "localhost") {
     setRunning()
     processWorkflows().catch(handleError)
   }
+}
+
+function handleError(err) {
+  setStopped()
+  // eslint-disable-next-line no-console
+  console.log(err)
+  errorLabel.textContent = err
+  throw err
 }
 
 // eslint-disable-next-line no-unused-vars
