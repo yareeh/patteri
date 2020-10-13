@@ -3,7 +3,7 @@ import {
   getConfig,
   isConfigStored,
   storeConfig,
-} from "../src/storage.js"
+} from "../docs/storage.js"
 import "mock-local-storage"
 
 import chai from "chai"

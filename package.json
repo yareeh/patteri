@@ -8,9 +8,9 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "lint": "eslint src",
+    "lint": "eslint docs",
     "test": "mocha --require jsdom-global --require mock-local-storage test",
-    "serve": "http-server src"
+    "serve": "http-server docs"
   },
   "devDependencies": {
     "chai": "^4.2.0",

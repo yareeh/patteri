@@ -1,6 +1,6 @@
 import chai from "chai"
 const assert = chai.assert
-import { toElementData } from "../src/util.js"
+import { toElementData } from "../docs/util.js"
 
 describe("toElementData", () => {
   it("sets class correctly in main branch", () => {
