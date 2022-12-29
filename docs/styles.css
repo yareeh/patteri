@@ -11,11 +11,18 @@ body {
   display: flex;
   flex-direction: column;
   height: 90vh;
+  width: 100%;
 }
 
 .row {
   display: flex;
   flex-direction: row;
+  width: 100%;
+  align-items: stretch;
+}
+
+.two-by-row .run {
+  width: 46%;
 }
 
 .failed-row {
@@ -26,22 +33,18 @@ body {
   flex-grow: 1;
 }
 
-.run-container {
-  display: flex;
-  flex-grow: 1;
-  flex-basis: 50%;
-}
-
 .run {
   background: gray;
   display: flex;
   flex-grow: 1;
+  flex-basis: 0;
   border-radius: 8px;
   padding: 8px;
   margin: 4px;
   color: white;
   font-weight: bold;
   font-size: 3vw;
+  align-items: center;
 }
 
 .success {
@@ -79,13 +82,15 @@ body {
   background: pink;
 }
 
-.title, .title a {
+.title {
   color: inherit;
   font-weight: inherit;
   font-size: inherit;
-  flex-basis: 100%;
-  display: grid;
   align-items: center;
   text-align: center;
   text-decoration: none;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow: hidden;
+  width: 100%;
 }

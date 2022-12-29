@@ -183,12 +183,15 @@ async function processWorkflows() {
 
   const rows = []
   if (noSuccess.length % 2 === 1) {
-    rows.push(createRow("row failed-row", [noSuccess.shift()]))
+    rows.push(createRow("row failed-row two-by-row", [noSuccess.shift()]))
   }
 
   ;[...Array(noSuccess.length / 2).keys()].forEach(() => {
     rows.push(
-      createRow("row failed-row", [noSuccess.shift(), noSuccess.shift()])
+      createRow("row failed-row two-by-row", [
+        noSuccess.shift(),
+        noSuccess.shift(),
+      ])
     )
   })
 
@@ -221,18 +224,13 @@ function createRow(className, elements) {
 
 function toElement(run) {
   const data = toElementData(run)
-  const element = document.createElement("div")
-  element.setAttribute("class", `run-container`)
   const runContainer = document.createElement("div")
   runContainer.setAttribute("class", data.className)
-  const title = document.createElement("span")
-  title.setAttribute("class", "title")
   const link = document.createElement("a")
+  link.setAttribute("class", "title")
   link.setAttribute("href", data.url)
   const titleText = document.createTextNode(`${data.name} @ ${data.branch}`)
   link.appendChild(titleText)
-  title.appendChild(link)
-  runContainer.appendChild(title)
-  element.appendChild(runContainer)
-  return element
+  runContainer.appendChild(link)
+  return runContainer
 }
