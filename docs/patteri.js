@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { getConfig, isConfigStored, storeConfig } from "./storage.js"
 import { isMain, runMapper, toElementData } from "./util.js"
 
