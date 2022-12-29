@@ -85,7 +85,7 @@ async function getWorkflows(repo, headers) {
 }
 
 async function getBranches(repo, headers) {
-  const url = `https://api.github.com/repos/${repo}/branches`
+  const url = `https://api.github.com/repos/${repo}/branches?per_page=100`
   const response = await fetch(url, { headers })
   if (response.status !== 200) {
     throw new Error(`${url} ${response.status} ${response.statusText}`)
