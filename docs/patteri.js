@@ -157,6 +157,7 @@ async function processWorkflows() {
 
   const headers = new Headers({
     Authorization: `token ${configuration.token}`,
+    Accept: "application/vnd.github+json",
   })
   const workflows = await getWorkflows(configuration.repo, headers).catch(
     handleError
