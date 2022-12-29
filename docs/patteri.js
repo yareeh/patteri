@@ -162,6 +162,7 @@ async function processWorkflows() {
   const workflows = await getWorkflows(configuration.repo, headers).catch(
     handleError
   )
+
   const workflowMap = getWorkflowMap(workflows)
   const workflowUrls = workflows.map((w) => w.url)
   const workflowRuns = await getWorkflowRuns(workflowUrls, headers).catch(
